@@ -95,9 +95,21 @@ module Make(V:Constant.S)(C:Config) =
 
       (pp_reg, pp_reg, (fun sf _ -> (pp_reg sf)), pp_label)
 
+    let sort_uniq cmp l =
+      (* List.sort_uniq cmp l *)
+      let l = List.sort cmp l in
+      let rec uniq l1 l2 =
+        begin match (l1, l2) with
+        | (_, []) -> List.rev l1
+        | (h1::_, h2::t2) when cmp h1 h2 = 0 -> uniq l1 t2
+        | (_, h2::t2) -> uniq (h2::l1) t2
+        end
+      in
+      uniq [] l
+
     let get_reg_env voidstars outputs inputs =
-      (* assuming outputs and inputs are disjoint *)
-      let simple_regs = List.filter (fun e -> not (List.mem e voidstars)) (outputs @ inputs) in
+      let uniq_inouts = sort_uniq compare (List.merge compare outputs inputs) in
+      let simple_regs = List.filter (fun e -> not (List.mem e voidstars)) uniq_inouts in
       (List.map (fun reg -> (inst_reg_to_reg reg, voidstar)) voidstars) @
       (List.map (function X reg -> (reg, quad) | W reg -> (reg, word)) simple_regs)
 
@@ -115,8 +127,8 @@ module Make(V:Constant.S)(C:Config) =
             ([], [t], [], [Next; Branch label])
         end
       in
-      let outputs = remove_zrsp outputs in
-      let inputs = remove_zrsp inputs in
+      let outputs = sort_uniq compare (remove_zrsp outputs) in
+      let inputs = sort_uniq compare (remove_zrsp inputs) in
       let voidstars = remove_zrsp voidstars in
       let (pp_regzr, pp_regsp, pp_regzrbyext, pp_label) = get_pps tr_lab inputs outputs in
 

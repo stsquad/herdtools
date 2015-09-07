@@ -1,3 +1,6 @@
+(* for each instruction instance, identify the role of the registers
+   and possible branching: (outputs, inputs, voidstars, branch) *)
+
 | `AArch64AddSubCarry (d,n,m,_datasize,_sub_op,_setflags) ->
       ([d], [n; m], [], [Next])
 
@@ -81,22 +84,22 @@
 | `AArch64LoadStorePair (false,_postindex,n,t,t2,_acctype,MemOp_STORE,_signed,_scale,_datasize,_offset) ->
       ([], [n; t; t2], [n], [Next])
 | `AArch64LoadStorePair (true,_postindex,n,t,t2,_acctype,MemOp_STORE,_signed,_scale,_datasize,_offset) ->
-      ([n], [t; t2], [n], [Next])
+      ([n], [n; t; t2], [n], [Next])
 
 | `AArch64LoadStorePair (false,_postindex,n,t,t2,_acctype,MemOp_LOAD,_signed,_scale,_datasize,_offset) ->
       ([t; t2], [n], [n], [Next])
 | `AArch64LoadStorePair (true,_postindex,n,t,t2,_acctype,MemOp_LOAD,_signed,_scale,_datasize,_offset) ->
-      ([t; t2; n], [], [n], [Next])
+      ([t; t2; n], [n], [n], [Next])
 
 | `AArch64LoadImmediate (n,t,_acctype,MemOp_STORE,_signed,false,_postindex,_offset,_regsize,_datasize) ->
       ([], [n; t], [n], [Next])
 | `AArch64LoadImmediate (n,t,_acctype,MemOp_STORE,_signed,true,_postindex,_offset,_regsize,_datasize) ->
-      ([n], [t], [n], [Next])
+      ([n], [n; t], [n], [Next])
 
 | `AArch64LoadImmediate (n,t,_acctype,MemOp_LOAD,_signed,false,_postindex,_offset,_regsize,_datasize) ->
       ([t], [n], [n], [Next])
 | `AArch64LoadImmediate (n,t,_acctype,MemOp_LOAD,_signed,true,_postindex,_offset,_regsize,_datasize) ->
-      ([t; n], [], [n], [Next])
+      ([t; n], [n], [n], [Next])
 
 | `AArch64LoadLiteral (t,MemOp_STORE,_signed,_size,_offset,_datasize) ->
       ([], [t], [], [Next])
@@ -107,12 +110,12 @@
 | `AArch64LoadRegister (n,t,m,_acctype,MemOp_STORE,_signed,false,_postindex,_extend_type,_shift,_regsize,_datasize) ->
     ([], [n; t; m], [n], [Next])
 | `AArch64LoadRegister (n,t,m,_acctype,MemOp_STORE,_signed,true,_postindex,_extend_type,_shift,_regsize,_datasize) ->
-    ([n], [t; m], [n], [Next])
+    ([n], [n; t; m], [n], [Next])
 
 | `AArch64LoadRegister (n,t,m,_acctype,MemOp_LOAD,_signed,false,_postindex,_extend_type,_shift,_regsize,_datasize) ->
     ([t], [n; m], [n], [Next])
 | `AArch64LoadRegister (n,t,m,_acctype,MemOp_LOAD,_signed,true,_postindex,_extend_type,_shift,_regsize,_datasize) ->
-    ([t; n], [m], [n], [Next])
+    ([t; n], [n; m], [n], [Next])
 
 | `AArch64LoadRegister (n,t,m,_acctype,MemOp_PREFETCH,_signed,_wback,_postindex,_extend_type,_shift,_regsize,_datasize) ->
     ([], [n; m], [n], [Next])
