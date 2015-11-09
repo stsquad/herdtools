@@ -46,6 +46,7 @@ let suffix = ref ""
 let dumpes = ref false
 let outputdir = ref None
 let dumplem = ref false
+let dumpalloy = ref false
 let dumptex = ref false
 
 (* Pretty printing configuration, deserves its own module *)

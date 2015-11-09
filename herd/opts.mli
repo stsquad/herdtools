@@ -45,6 +45,7 @@ val outputdir : string option ref
 val suffix : string ref
 val dumpes : bool ref
 val dumplem : bool ref
+val dumpalloy : bool ref
 val dumptex : bool ref
 
 (* Pretty printing configuration, deserves its own module *)

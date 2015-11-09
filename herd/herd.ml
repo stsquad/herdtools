@@ -126,6 +126,9 @@ let options = [
   ( "-dumplem",
     Arg.Unit (fun _ -> dumplem := true),
     "<non-default> convert the given model to Lem format") ;
+  ( "-dumpalloy",
+    Arg.Unit (fun _ -> dumpalloy := true),
+    "<non-default> convert the given model to Alloy format") ;
   ( "-dumptex",
     Arg.Unit (fun _ -> dumptex := true),
     "<non-default> convert the given model to Latex format") ;
@@ -444,6 +447,7 @@ let () =
     let suffix = !suffix
     let dumpes = !dumpes
     let dumplem = !dumplem
+    let dumpalloy = !dumpalloy
     let dumptex = !dumptex
 
     module PC = struct
@@ -522,12 +526,19 @@ let () =
 (* Just go *)
   let tests = !args in
   if Config.dumplem then begin
-    match model with
-    | Some (Model.Generic (_,(_,_,prog))) -> 
-      Herd2lem.lem_of_prog stdout prog; 
-      exit 0
-    | _ -> Warn.user_error "No model given"
-  end;
+      match model with
+      | Some (Model.Generic (_,(_,_,prog))) -> 
+	 Herd2lem.lem_of_prog stdout prog; 
+	 exit 0
+      | _ -> Warn.user_error "No model given"
+    end;
+  if Config.dumpalloy then begin
+      match model with
+      | Some (Model.Generic (_,(_,_,prog))) -> 
+	 Herd2alloy.alloy_of_prog stdout prog; 
+	 exit 0
+      | _ -> Warn.user_error "No model given"
+    end;
   if Config.dumptex then begin
     match model with
     | Some (Model.Generic (_,(_,name,prog))) -> 

@@ -25,6 +25,7 @@ module type Config = sig
   val suffix : string
   val dumpes : bool
   val dumplem : bool
+  val dumpalloy : bool
   val dumptex : bool
   val badexecs : bool
   include Mem.Config
