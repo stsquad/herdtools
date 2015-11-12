@@ -51,8 +51,8 @@ and alloy_of_op1 args chan e = function
   | Select _ -> fprintf chan "Select not done yet"
   | Inv -> fprintf chan "(~%a)" (alloy_of_exp args) e
   | Square -> fprintf chan "(%a -> %a)" (alloy_of_exp args) e (alloy_of_exp args) e
-  | Ext -> fprintf chan "(%a - thd)" (alloy_of_exp args) e
-  | Int -> fprintf chan "(%a & thd)" (alloy_of_exp args) e
+  | Ext -> fprintf chan "(%a - x.thd)" (alloy_of_exp args) e
+  | Int -> fprintf chan "(%a & x.thd)" (alloy_of_exp args) e
   | NoId -> fprintf chan "(%a - iden)" (alloy_of_exp args) e
   | Set_to_rln -> fprintf chan "(stor[%a])" (alloy_of_exp args) e
   | Comp SET -> fprintf chan "(E - %a)" (alloy_of_exp args) e
@@ -60,8 +60,13 @@ and alloy_of_op1 args chan e = function
   | _ -> Warn.fatal "Unknown operator in herd2alloy"
 and alloy_of_var args chan x = 
   match x with
-  | "rf" | "asw" | "lo" | "po" | "addr" | "data" | "co" | "S" | "acq" | "rel" | "sc" | "R" | "W" | "F" | "con" -> 
-    fprintf chan "(x.%s)" x
+  | "rf" | "asw" | "lo" | "addr" | "data" | "acq"
+  | "rel" | "sc" | "R" | "W" | "F" | "A" | "con" | "thd" | "loc" -> fprintf chan "(x.%s)" x
+  | "nonatomicloc" -> fprintf chan "(x.naL)"
+  | "mo" -> fprintf chan "^(x.mo)"
+  | "sb" -> fprintf chan "^(x.sb)"
+  | "S" -> fprintf chan "s"
+  | "I" -> fprintf chan "I"
   | "_" -> fprintf chan "E"
   | "id" -> fprintf chan "iden"
   | _ -> 
@@ -118,14 +123,15 @@ let print_derived_relations chan = function
   | Let (_,bs) -> List.iter (alloy_of_binding chan) bs
   | _ -> ()
 
-let print_provides_clauses chan = function
+let print_provides_clauses (with_sc:bool) chan = function
   | Test (_,_, test, exp, name, Provides) ->
     let name = begin match name with 
-        | None -> Warn.user_error "You need to give each constraint a name!\n"
+        | None -> Warn.user_error "You need to give each constraint a name!"
         | Some name -> name 
     end in
-    fprintf chan "pred %s[x : CandExec, y : Extras] {\n  %s[%a]\n}\n\n" 
+    fprintf chan "pred %s[x : CandExec, y : Extras%s] {\n  %s[%a]\n}\n\n" 
 	    name
+	    (if with_sc then ", s : E -> E" else "")
 	    (alloy_of_test test)
 	    (alloy_of_exp []) exp;
     if (!seen_requires_clause) then
@@ -165,23 +171,25 @@ let alloy_of_ins chan = function
   | Foreach _ | ForOrder _ | Rec _ ->
       Warn.fatal "procedure/call/enum/debug/foreach in herd2alloy"
 
-let alloy_of_prog chan prog =
+let alloy_of_prog chan (with_sc:bool) prog =
   
   fprintf chan "open c11_herd\n\n";
   
   let derived_relations = find_derived_relations prog in
   fprintf chan "sig Extras {\n  ";
   fprintf_iter ", " (fun chan -> fprintf chan "%s") chan derived_relations;
-  fprintf chan "\n}\n\n";
-
-  fprintf chan "pred wf_Extras[x : CandExec, y : Extras] {\n";  
+  fprintf chan " : E -> E\n}\n\n";
+  fprintf chan "pred wf_Extras[x : CandExec, y : Extras%s] {\n\n"
+	  (if with_sc then ", s : E -> E" else "");
   List.iter (print_derived_relations chan) prog;
   fprintf chan "}\n\n";
 
-  List.iter (print_provides_clauses chan) prog;
+  List.iter (print_provides_clauses with_sc chan) prog;
 
   fprintf chan "pred consistent[x : CandExec] {\n";
-  fprintf chan "  some y : Extras when wf_Extras[x,y] |\n    ";
-  fprintf_iter "\n    && " (fun chan -> fprintf chan "%s[x,y]") chan (List.rev !provides);
+  if with_sc then
+    fprintf chan "  some s : E -> E | ax_wfS[x,s] &&\n";
+  fprintf chan "  some y : Extras | wf_Extras[x,y%s] &&\n    " (if with_sc then ",s" else "");
+  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,y%s]" s (if with_sc then ",s" else "")) chan (List.rev !provides);
   fprintf chan "\n}\n\n";
   

@@ -535,7 +535,7 @@ let () =
   if Config.dumpalloy then begin
       match model with
       | Some (Model.Generic (_,(_,_,prog))) -> 
-	 Herd2alloy.alloy_of_prog stdout prog; 
+	 Herd2alloy.alloy_of_prog stdout model_opts.ModelOption.sc prog; 
 	 exit 0
       | _ -> Warn.user_error "No model given"
     end;
