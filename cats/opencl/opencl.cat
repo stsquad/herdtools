@@ -1,32 +1,46 @@
-"OpenCL"
-withoutsc
-
+"OpenCL" withoutsc
+  
 include "opencl_base.cat"
+	  
+(**************************************)
+(* Sequential consistency, simplified *)
+(**************************************)
 
-(* BEGIN PARTIAL SC STUFF *)
-let scp' = scp & sc6
-acyclic scp' & ifexists(mo_sc & !s_all) as S_exists
-show scp' as scp
-(* END PARTIAL SC STUFF *)
+let scp = Fsb?; (rb | mo | (ghb | lhb)); sbF?
+					   
+(* The following evaluates to "unv" if every
+   SC event has scope s_all and accesses 
+   fine-grained buffers with atomics support, 
+   and to "empty" otherwise *)
+let S_cond1 = ~(unv; [mo_sc \ (s_all & fga)]; unv)
 
+(* The following evaluates to "unv" if every 
+   SC event has scope s_dev and does not access 
+   fine-grained buffers with atomics support, and 
+   to "empty" otherwise *)					       
+let S_cond2 = ~(unv; [mo_sc \ (s_dev & !fga)]; unv)
+	
+acyclic (mo_sc^2) & scp & (S_cond1|S_cond2)
+                         	      as O-Ssimp
+
+show scp & (S_cond1|S_cond2) as scp
+
+								       
 (*********)
 (* Races *)
 (*********)
 
-let conflict = ((W * _) | (_ * W)) & loc
+let cnf = ((W * W) | (W * R) | (R * W)) & loc
 
 (* Data races *)
-let dr = conflict & ~symm(ghb | lhb) & ~incl
-undefined_unless empty dr as data_race
+let dr = cnf & ~(ghb | lhb) &
+	      ~(ghb | lhb)^-1 & ~wi & ~incl
+undefined_unless empty dr as O-Dr
 show dr
-
-(* Unsequenced races *)
-let ur = (wi & conflict & ~symm(po)) \ id 
-undefined_unless empty ur as unsequenced_race
-show ur
 
 (* Barrier divergence *)
 let bsw = bar_sw(G) | bar_sw(L)
-let bd = [entry_fence] & ((~wi & wg); unv) \ (bsw ; unv)
-undefined_unless empty bd as barrier_divergence
+let bd = [entry_fence] & ((~wi & wg);unv)
+                           \ (bsw;unv)
+undefined_unless empty bd as O-Bd
 show bd
