@@ -2,14 +2,18 @@
 
 (* withinit *)
 
-(* let sb = po *)
-(* let mo = co & (!nonatomicloc)^2 *)
+(** BEGIN ALLOY IGNORE *)
+  
+let sb = po
+let mo = co & (!nonatomicloc)^2
 
-(*let cacq = acq | (sc & (R | F)) | acq_rel
-           | (F & con)*)
+let acq = acq | (sc & (R | F)) | acq_rel
+           | (F & con)
 	     
-(*let crel = rel | (sc & (W | F)) | acq_rel
-let ccon = R & con*)
+let rel = rel | (sc & (W | F)) | acq_rel
+(* let ccon = R & con *)
+				   
+(** END ALLOY IGNORE *)
 
 (*let fr = rf^-1 ; mo*)
 
@@ -58,7 +62,7 @@ let hbl = hb & loc
 
 let com = mo | rf | fr
 
-irreflexive (hbl | com) as Coh
+acyclic (hbl | com) as Coh
 
 (* visible_side_effect_set *)
 let vis = ([W] ; hbl ; [R])

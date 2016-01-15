@@ -12,5 +12,6 @@ P0 (int* x, int* y) {
   *y = (*x == *x);
 }
 
+locations [x;y;]
 exists
 ()

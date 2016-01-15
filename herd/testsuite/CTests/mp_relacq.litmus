@@ -1,4 +1,4 @@
-C mp_sc
+C mp_relacq
 
 {
 [x] = 0;
@@ -7,11 +7,11 @@ C mp_sc
 
 P0 (atomic_int* y, int* x) {
  *x = 1;
- atomic_store(y,1);
+ atomic_store_explicit(y,1,memory_order_release);
 }
 
 P1 (atomic_int* y, int* x) {
- int r0 = atomic_load(y);
+ int r0 = atomic_load_explicit(y,memory_order_acquire);
  int r1 = -1;
  if (1 == r0) {
    r1 = *x;
