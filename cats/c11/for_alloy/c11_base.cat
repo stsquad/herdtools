@@ -62,7 +62,7 @@ let hbl = hb & loc
 
 let com = mo | rf | fr
 
-acyclic (hbl | com) as Coh
+irreflexive (mo | fr | (fr ; rf)) ; hb as Coh
 
 (* visible_side_effect_set *)
 let vis = ([W] ; hbl ; [R])
