@@ -65,8 +65,9 @@ and alloy_of_op1 args chan e = function
 and alloy_of_var args chan x = 
   match x with
   | "asw" | "lo" | "addr" | "data" | "acq" | "rel"
-  | "sc" | "R" | "W" | "F" | "A" | "con" | "thd"
-  | "loc" -> fprintf chan "(x.%s)" x
+  | "sc" | "R" | "W" | "F" | "A" | "con"
+	-> fprintf chan "(x.%s)" x
+  | "thd" | "loc" -> fprintf chan "(rc[x.%s])" x
   | "rf" -> fprintf chan "rf"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
   | "mo" -> fprintf chan "^mo"
@@ -75,6 +76,7 @@ and alloy_of_var args chan x =
   | "I" -> fprintf chan "I"
   | "_" -> fprintf chan "E"
   | "id" -> fprintf chan "iden"
+  | "fr" -> fprintf chan "(fr[x,rf,mo])"
   | _ -> 
     let x = Str.global_replace (Str.regexp_string "-") "_" x in
     if List.mem x args then
