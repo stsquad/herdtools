@@ -2,7 +2,7 @@
 
 (* withinit *)
 
-(** BEGIN ALLOY IGNORE *)
+let alloy_ignore_section_begin = _
   
 let sb = po
 let mo = co & (!nonatomicloc)^2
@@ -13,7 +13,7 @@ let acq = acq | (sc & (R | F)) | acq_rel
 let rel = rel | (sc & (W | F)) | acq_rel
 (* let ccon = R & con *)
 				   
-(** END ALLOY IGNORE *)
+let alloy_ignore_section_end = _
 
 (*let fr = rf^-1 ; mo*)
 

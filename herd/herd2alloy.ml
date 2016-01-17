@@ -17,6 +17,8 @@ open Printf
 
 let with_sc = ref false
 
+let in_ignore_section = ref false 
+
 let rec fprintf_iter s f chan = function
   | [] -> ()
   | [x] -> fprintf chan "%a" f x
@@ -97,19 +99,29 @@ and alloy_of_binding chan (x, e) =
   | Fun (_,_,_,_,_) ->
      fprintf chan "Functions not done yet"
   | _ ->
-     fprintf chan "(y.%s) = %a\n\n" 
-             x 
-             (alloy_of_exp []) e
+     if x = "alloy_ignore_section_begin" then
+       in_ignore_section := true
+     else if x = "alloy_ignore_section_end" then
+       in_ignore_section := false
+     else if not !in_ignore_section then
+       fprintf chan "(y.%s) = %a\n\n" 
+               x 
+               (alloy_of_exp []) e
 
 and alloy_of_binding' chan (x, e) = 
   match e with
   | Fun (_,_,_,_,_) ->
      fprintf chan "Functions not done yet"
   | _ ->
-     fprintf chan "fun %s[x : BasicExec, rf : E -> E, mo : E -> E%s] : E -> E {\n  %a\n}\n\n" 
-             x
-	     (if !with_sc then ", s : E -> E" else "")
-             (alloy_of_exp []) e
+     if x = "alloy_ignore_section_begin" then
+       in_ignore_section := true
+     else if x = "alloy_ignore_section_end" then
+       in_ignore_section := false
+     else if not !in_ignore_section then
+       fprintf chan "fun %s[x : BasicExec, rf : E -> E, mo : E -> E%s] : E -> E {\n  %a\n}\n\n" 
+               x
+	       (if !with_sc then ", s : E -> E" else "")
+               (alloy_of_exp []) e
 
 let fprintf_so x chan so = 
   fprintf chan "%s" (match so with
