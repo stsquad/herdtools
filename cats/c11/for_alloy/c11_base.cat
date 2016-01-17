@@ -52,7 +52,7 @@ let ithb = (ithbr | (sb ; ithbr))+
  *)
 	       (* let hb = sb | ithb *)
 
-let hb = (sb | (I * !I) | swra)+
+let hb = (sb | swra)+
 	       
 acyclic hb as Hb
 
