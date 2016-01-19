@@ -38,9 +38,56 @@ Condition exists (0:r0=1 /\ 0:r1=0)
 Observation John1 Sometimes 2 2
 Hash=ec4d655276fce9021dfda04a680552e6
 
+Test John2 Allowed
+States 14
+0:r0=0; 0:r1=0; 2:r2=0;
+0:r0=0; 0:r1=0; 2:r2=1;
+0:r0=0; 0:r1=1; 2:r2=0;
+0:r0=0; 0:r1=1; 2:r2=1;
+0:r0=0; 0:r1=2; 2:r2=0;
+0:r0=0; 0:r1=2; 2:r2=1;
+0:r0=1; 0:r1=1; 2:r2=0;
+0:r0=1; 0:r1=1; 2:r2=1;
+0:r0=1; 0:r1=2; 2:r2=0;
+0:r0=1; 0:r1=2; 2:r2=1;
+0:r0=2; 0:r1=1; 2:r2=0;
+0:r0=2; 0:r1=1; 2:r2=1;
+0:r0=2; 0:r1=2; 2:r2=0;
+0:r0=2; 0:r1=2; 2:r2=1;
+Ok
+Witnesses
+Positive: 1 Negative: 23
+Bad executions (0 in total):  
+Condition exists (0:r0=1 /\ 0:r1=2 /\ 2:r2=0)
+Observation John2 Sometimes 1 23
+Hash=8d359125e2faa2d3ba2c98a498395acc
+
+Test John3 Allowed
+States 13
+0:r0=0; 0:r1=0; 2:r2=0;
+0:r0=0; 0:r1=0; 2:r2=1;
+0:r0=0; 0:r1=1; 2:r2=0;
+0:r0=0; 0:r1=1; 2:r2=1;
+0:r0=0; 0:r1=2; 2:r2=0;
+0:r0=0; 0:r1=2; 2:r2=1;
+0:r0=1; 0:r1=1; 2:r2=0;
+0:r0=1; 0:r1=1; 2:r2=1;
+0:r0=1; 0:r1=2; 2:r2=1;
+0:r0=2; 0:r1=1; 2:r2=0;
+0:r0=2; 0:r1=1; 2:r2=1;
+0:r0=2; 0:r1=2; 2:r2=0;
+0:r0=2; 0:r1=2; 2:r2=1;
+No
+Witnesses
+Positive: 0 Negative: 36
+Bad executions (0 in total):  
+Condition exists (0:r0=1 /\ 0:r1=2 /\ 2:r2=0)
+Observation John3 Never 0 36
+Hash=5f18bafecfe6768724e0b58fc1e4d40e
+
 Test LB+datas+REAL Required
 States 2
-0:r0=S29; 1:r0=S29;
+0:r0=S47; 1:r0=S47;
 0:r0=0; 1:r0=0;
 No
 Witnesses
@@ -147,6 +194,23 @@ Bad executions (0 in total):
 Condition ~exists (1:r0=x /\ 1:r1=0)
 Observation MP_relcon_addr_real Never 0 2
 Hash=51e85a77c78aa0b8514f147606b34a27
+
+Test coh1 Allowed
+States 7
+0:r0=0; 0:r1=0; 2:r2=0;
+0:r0=0; 0:r1=1; 2:r2=0;
+0:r0=0; 0:r1=2; 2:r2=0;
+0:r0=1; 0:r1=1; 2:r2=0;
+0:r0=1; 0:r1=2; 2:r2=0;
+0:r0=2; 0:r1=1; 2:r2=0;
+0:r0=2; 0:r1=2; 2:r2=0;
+No
+Witnesses
+Positive: 0 Negative: 18
+Bad executions (0 in total):  
+Condition exists (0:r0=1 /\ 0:r1=2 /\ 2:r2=2)
+Observation coh1 Never 0 18
+Hash=92901aed42413a4cd286dbfaaae70644
 
 Test cppmem_iriw Allowed
 States 16
