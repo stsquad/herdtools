@@ -89,8 +89,8 @@ let cnf = ((W * _) | (_ * W)) & loc
 let dr = ext(cnf \ hb \ (hb^-1) \ (A * A))
 
 (* unsequenced_races *)
-(*let ur = int((W * M) | (M * W)) &
-         loc & ~[_] & ~(sb+) & ~((sb+)^-1)*)
+let ur = int((W * M) | (M * W)) &
+         loc & ~[_] & ~(sb+) & ~((sb+)^-1)
 
 (* locks_only_good_mutex_use,
    locks_only_bad_mutexes *)
