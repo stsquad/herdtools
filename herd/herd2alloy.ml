@@ -167,7 +167,7 @@ let print_predicates chan = function
 	    (if !with_sc then ", s : E -> E" else "")
 	    (alloy_of_test test)
 	    (alloy_of_exp []) exp;
-    match test_type with
+    begin match test_type with
     | Provides -> 
        if (!seen_requires_clause) then
 	 Warn.user_error "Provides-clause follows requires-clause!";
@@ -175,6 +175,7 @@ let print_predicates chan = function
     | Requires ->
        seen_requires_clause := true;
        requires := name :: (!requires)
+    end
 
   | _ -> ()
 					  
