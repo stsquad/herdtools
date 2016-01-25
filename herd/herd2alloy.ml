@@ -78,16 +78,19 @@ and alloy_of_var args chan x =
   | "thd" | "loc" -> fprintf chan "(rc[x.%s])" x
   | "rf" -> fprintf chan "rf"
   | "rfe" -> fprintf chan "(rf - x.thd)"
+  | "co" -> fprintf chan "^co"
+  | "coe" -> fprintf chan "(^co - x.thd)"
+  | "fr" -> fprintf chan "(fr[x,rf,co])"
+  | "fre" -> fprintf chan "(fr[x,rf,co] - x.thd)"
+  | "atom" -> fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
   | "po-loc" -> fprintf chan "(^(x.sb) & rc[x.loc])"
+  | "po" | "sb" -> fprintf chan "^(x.sb)"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
   | "MFENCE" -> fprintf chan "(x.F)"
-  | "co" -> fprintf chan "^co"
-  | "po" | "sb" -> fprintf chan "^(x.sb)"
   | "S" -> fprintf chan "^s"
   | "I" -> fprintf chan "I"
   | "M" | "_" -> fprintf chan "x.ev"
   | "id" -> fprintf chan "iden"
-  | "fr" -> fprintf chan "(fr[x,rf,co])"
   | _ -> 
     let x = Str.global_replace (Str.regexp_string "-") "_" x in
     if List.mem x args then
