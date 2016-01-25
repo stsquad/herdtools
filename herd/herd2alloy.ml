@@ -155,20 +155,26 @@ let print_derived_relations' chan = function
   | Let (_,bs) -> List.iter (alloy_of_binding' chan) bs
   | _ -> ()
 
-let print_provides_clauses chan = function
-  | Test (_,_, test, exp, name, Provides) ->
+let print_predicates chan = function
+  | Test (_,_, test, exp, name, test_type) ->
     let name = begin match name with 
         | None -> Warn.user_error "You need to give each constraint a name!"
         | Some name -> name 
-    end in
+ 	       end
+    in
     fprintf chan "pred %s[x : BasicExec, rf : E -> E, mo : E -> E%s] {\n  %s[%a]\n}\n\n" 
 	    name
 	    (if !with_sc then ", s : E -> E" else "")
 	    (alloy_of_test test)
 	    (alloy_of_exp []) exp;
-    if (!seen_requires_clause) then
-      Warn.user_error "Provides-clause follows requires-clause!";
-    provides := name :: (!provides)
+    match test_type with
+    | Provides -> 
+       if (!seen_requires_clause) then
+	 Warn.user_error "Provides-clause follows requires-clause!";
+       provides := name :: (!provides)
+    | Requires ->
+       seen_requires_clause := true;
+       requires := name :: (!requires)
 
   | _ -> ()
 					  
@@ -206,16 +212,19 @@ let alloy_of_ins chan = function
 let alloy_of_prog chan (with_sc_arg:bool) prog =
 
   with_sc := with_sc_arg;
-    fprintf chan "open c11_herd\n\n";
   
   List.iter (print_derived_relations' chan) prog;
 
-  List.iter (print_provides_clauses chan) prog;
+  List.iter (print_predicates chan) prog;
 
   fprintf chan "pred consistent[x : BasicExec, rf : E -> E, mo : E -> E] {\n      ";
   if !with_sc then
     fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
   (*  fprintf chan "  some y : Extras | wf_Extras[x,y%s] &&\n    " (if !with_sc then ",s" else ""); *)
   fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,mo%s]" s (if !with_sc then ",s" else "")) chan (List.rev !provides);
+  fprintf chan "\n}\n\n";
+
+  fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E, mo : E -> E] {\n      ";
+  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,mo%s]" s (if !with_sc then ",none->none" else "")) chan (List.rev !requires);
   fprintf chan "\n}\n\n";
   

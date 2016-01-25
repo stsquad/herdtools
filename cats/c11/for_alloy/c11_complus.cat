@@ -1,6 +1,4 @@
-"C++11"
-
-(* withinit *)
+"C++11" withinit
 
 let alloy_ignore_section_begin = _
   
@@ -101,3 +99,15 @@ let ur = int((W * M) | (M * W)) &
 let lu = [ul] &
   ~([ul] ; losbwoul^-1 ; [ls] ; losbwoul ; [ul])*)
 
+(*
+let scp = ((sc^2) & (fsb?; (mo | fr | hb); sbf?)) \ [_]
+ *)
+let scp = ((sc^2) & (fsb?; (com+ | hb); sbf?)) \ [_]
+ 
+acyclic scp as Ssimp
+show scp
+
+undefined_unless empty dr as Dr 
+(*undefined_unless empty ur as unsequencedRace*)
+(*undefined_unless empty bl as badLock *)
+(*undefined_unless empty lu as badUnlock *)
