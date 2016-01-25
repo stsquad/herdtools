@@ -112,6 +112,6 @@ irreflexive (S ; fr ; sbf) as S6
 irreflexive (S ; fsb ; fr ; sbf) as S7
 
 undefined_unless empty dr as Dr 
-(*undefined_unless empty ur as unsequencedRace*)
+undefined_unless empty ur as Ur
 (*undefined_unless empty bl as badLock *)
 (*undefined_unless empty lu as badUnlock *)
