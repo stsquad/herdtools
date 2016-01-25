@@ -84,7 +84,7 @@ and alloy_of_var args chan x =
   | "po" | "sb" -> fprintf chan "^(x.sb)"
   | "S" -> fprintf chan "^s"
   | "I" -> fprintf chan "I"
-  | "_" -> fprintf chan "x.ev"
+  | "M" | "_" -> fprintf chan "x.ev"
   | "id" -> fprintf chan "iden"
   | "fr" -> fprintf chan "(fr[x,rf,co])"
   | _ -> 
