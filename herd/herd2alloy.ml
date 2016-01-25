@@ -40,6 +40,14 @@ let alloy_of_konst chan = function
   | Empty SET -> fprintf chan "emps"
   | Empty RLN -> fprintf chan "empr"
 
+let alloy_of_dir = function
+  | Write -> "x.W"
+  | Read -> "x.R"
+  | WriteRead -> "x.(W&R)"
+  | Atomic -> "x.A"
+  | Plain -> "x.(ev-A)"
+  | Unv_Set -> "x.ev"
+		 
 let rec alloy_of_op2 args chan es = function
   | Union -> fprintf_list_infix "+" (alloy_of_exp args) chan es
   | Inter -> fprintf_list_infix "&" (alloy_of_exp args) chan es
@@ -52,15 +60,15 @@ and alloy_of_op1 args chan e = function
   | Plus -> fprintf chan "(^%a)" (alloy_of_exp args) e
   | Star -> fprintf chan "(*%a)" (alloy_of_exp args) e
   | Opt -> fprintf chan "(rc[%a])" (alloy_of_exp args) e
-  | Select _ -> fprintf chan "Select not done yet"
+  | Select (d1,d2) -> fprintf chan "((%s -> %s) & %a)" (alloy_of_dir d1) (alloy_of_dir d2) (alloy_of_exp args) e 
   | Inv -> fprintf chan "(~%a)" (alloy_of_exp args) e
   | Square -> fprintf chan "(%a -> %a)" (alloy_of_exp args) e (alloy_of_exp args) e
   | Ext -> fprintf chan "(%a - x.thd)" (alloy_of_exp args) e
   | Int -> fprintf chan "(%a & x.thd)" (alloy_of_exp args) e
   | NoId -> fprintf chan "(%a - iden)" (alloy_of_exp args) e
   | Set_to_rln -> fprintf chan "(stor[%a])" (alloy_of_exp args) e
-  | Comp SET -> fprintf chan "(E - %a)" (alloy_of_exp args) e
-  | Comp RLN -> fprintf chan "((E -> E) - %a)" (alloy_of_exp args) e
+  | Comp SET -> fprintf chan "(x.ev - %a)" (alloy_of_exp args) e
+  | Comp RLN -> fprintf chan "((x.ev -> x.ev) - %a)" (alloy_of_exp args) e
   | _ -> Warn.fatal "Unknown operator in herd2alloy"
 and alloy_of_var args chan x = 
   match x with
@@ -69,20 +77,22 @@ and alloy_of_var args chan x =
 	-> fprintf chan "(x.%s)" x
   | "thd" | "loc" -> fprintf chan "(rc[x.%s])" x
   | "rf" -> fprintf chan "rf"
+  | "po-loc" -> fprintf chan "(^(x.sb) & rc[x.loc])"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
-  | "mo" -> fprintf chan "^mo"
-  | "sb" -> fprintf chan "^(x.sb)"
+  | "MFENCE" -> fprintf chan "(x.F)"
+  | "co" -> fprintf chan "^co"
+  | "po" | "sb" -> fprintf chan "^(x.sb)"
   | "S" -> fprintf chan "^s"
   | "I" -> fprintf chan "I"
-  | "_" -> fprintf chan "E"
+  | "_" -> fprintf chan "x.ev"
   | "id" -> fprintf chan "iden"
-  | "fr" -> fprintf chan "(fr[x,rf,mo])"
+  | "fr" -> fprintf chan "(fr[x,rf,co])"
   | _ -> 
     let x = Str.global_replace (Str.regexp_string "-") "_" x in
     if List.mem x args then
       fprintf chan "%s" x
     else
-      fprintf chan "(%s[x,rf,mo%s])" x (if !with_sc then ",s" else "")
+      fprintf chan "(%s[x,rf,co%s])" x (if !with_sc then ",s" else "")
 
 and alloy_of_exp args chan = function
   | Konst (_,k) -> alloy_of_konst chan k
@@ -120,7 +130,7 @@ and alloy_of_binding' chan (x, e) =
      else if x = "alloy_ignore_section_end" then
        in_ignore_section := false
      else if not !in_ignore_section then
-       fprintf chan "fun %s[x : BasicExec, rf : E -> E, mo : E -> E%s] : E -> E {\n  %a\n}\n\n" 
+       fprintf chan "fun %s[x : BasicExec, rf : E -> E, co : E -> E%s] : E -> E {\n  %a\n}\n\n" 
                x
 	       (if !with_sc then ", s : E -> E" else "")
                (alloy_of_exp []) e
@@ -162,7 +172,7 @@ let print_predicates chan = function
         | Some name -> name 
  	       end
     in
-    fprintf chan "pred %s[x : BasicExec, rf : E -> E, mo : E -> E%s] {\n  %s[%a]\n}\n\n" 
+    fprintf chan "pred %s[x : BasicExec, rf : E -> E, co : E -> E%s] {\n  %s[%a]\n}\n\n" 
 	    name
 	    (if !with_sc then ", s : E -> E" else "")
 	    (alloy_of_test test)
@@ -218,14 +228,14 @@ let alloy_of_prog chan (with_sc_arg:bool) prog =
 
   List.iter (print_predicates chan) prog;
 
-  fprintf chan "pred consistent[x : BasicExec, rf : E -> E, mo : E -> E] {\n      ";
+  fprintf chan "pred consistent[x : BasicExec, rf : E -> E, co : E -> E] {\n      ";
   if !with_sc then
     fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
   (*  fprintf chan "  some y : Extras | wf_Extras[x,y%s] &&\n    " (if !with_sc then ",s" else ""); *)
-  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,mo%s]" s (if !with_sc then ",s" else "")) chan (List.rev !provides);
+  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,co%s]" s (if !with_sc then ",s" else "")) chan (List.rev !provides);
   fprintf chan "\n}\n\n";
 
-  fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E, mo : E -> E] {\n      ";
-  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,mo%s]" s (if !with_sc then ",none->none" else "")) chan (List.rev !requires);
+  fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E, co : E -> E] {\n      ";
+  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,co%s]" s (if !with_sc then ",none->none" else "")) chan (List.rev !requires);
   fprintf chan "\n}\n\n";
   

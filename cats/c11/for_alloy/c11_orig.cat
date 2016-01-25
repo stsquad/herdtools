@@ -3,7 +3,6 @@
 let alloy_ignore_section_begin = _
   
 let sb = po
-let mo = co & (!nonatomicloc)^2
 
 let acq = acq | (sc & (R | F)) | acq_rel
            | (F & con)
@@ -13,6 +12,8 @@ let rel = rel | (sc & (W | F)) | acq_rel
 				   
 let alloy_ignore_section_end = _
 
+let mo = co & (!nonatomicloc)^2
+				 
 (*let fr = rf^-1 ; mo*)
 
 (* let dd = (data | addr)+ *)
