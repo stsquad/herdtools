@@ -77,6 +77,7 @@ and alloy_of_var args chan x =
 	-> fprintf chan "(x.%s)" x
   | "thd" | "loc" -> fprintf chan "(rc[x.%s])" x
   | "rf" -> fprintf chan "rf"
+  | "rfe" -> fprintf chan "(rf - x.thd)"
   | "po-loc" -> fprintf chan "(^(x.sb) & rc[x.loc])"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
   | "MFENCE" -> fprintf chan "(x.F)"
