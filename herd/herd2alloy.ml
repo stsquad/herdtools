@@ -43,7 +43,7 @@ let alloy_of_konst chan = function
 let alloy_of_dir = function
   | Write -> "x.W"
   | Read -> "x.R"
-  | WriteRead -> "x.(W&R)"
+  | WriteRead -> "x.(W|R)"
   | Atomic -> "x.A"
   | Plain -> "x.(ev-A)"
   | Unv_Set -> "x.ev"
