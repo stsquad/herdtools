@@ -63,8 +63,8 @@ and alloy_of_op1 args chan e = function
   | Select (d1,d2) -> fprintf chan "((%s -> %s) & %a)" (alloy_of_dir d1) (alloy_of_dir d2) (alloy_of_exp args) e 
   | Inv -> fprintf chan "(~%a)" (alloy_of_exp args) e
   | Square -> fprintf chan "(%a -> %a)" (alloy_of_exp args) e (alloy_of_exp args) e
-  | Ext -> fprintf chan "(%a - x.thd)" (alloy_of_exp args) e
-  | Int -> fprintf chan "(%a & x.thd)" (alloy_of_exp args) e
+  | Ext -> fprintf chan "(%a - rc[x.thd])" (alloy_of_exp args) e
+  | Int -> fprintf chan "(%a & rc[x.thd])" (alloy_of_exp args) e
   | NoId -> fprintf chan "(%a - iden)" (alloy_of_exp args) e
   | Set_to_rln -> fprintf chan "(stor[%a])" (alloy_of_exp args) e
   | Comp SET -> fprintf chan "(x.ev - %a)" (alloy_of_exp args) e
@@ -77,11 +77,11 @@ and alloy_of_var args chan x =
 	-> fprintf chan "(x.%s)" x
   | "thd" | "loc" -> fprintf chan "(rc[x.%s])" x
   | "rf" -> fprintf chan "rf"
-  | "rfe" -> fprintf chan "(rf - x.thd)"
+  | "rfe" -> fprintf chan "(rf - rc[x.thd])"
   | "co" -> fprintf chan "^co"
-  | "coe" -> fprintf chan "(^co - x.thd)"
+  | "coe" -> fprintf chan "(^co - rc[x.thd])"
   | "fr" -> fprintf chan "(fr[x,rf,co])"
-  | "fre" -> fprintf chan "(fr[x,rf,co] - x.thd)"
+  | "fre" -> fprintf chan "(fr[x,rf,co] - rc[x.thd])"
   | "atom" -> fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
   | "po-loc" -> fprintf chan "(^(x.sb) & rc[x.loc])"
   | "po" | "sb" -> fprintf chan "^(x.sb)"
