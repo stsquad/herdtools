@@ -83,8 +83,8 @@ and alloy_of_var args chan x =
   | "fr" -> fprintf chan "(fr[x,rf,co])"
   | "fre" -> fprintf chan "(fr[x,rf,co] - x.thd)"
   | "atom" -> fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
-  | "po-loc" -> fprintf chan "(^(x.sb) & x.loc)"
-  | "po" | "sb" -> fprintf chan "^(x.sb)"
+  | "po-loc" -> fprintf chan "(x.sb & x.loc)"
+  | "po" | "sb" -> fprintf chan "(x.sb)"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
   | "MFENCE" -> fprintf chan "(x.F)"
   | "S" -> fprintf chan "^s"
