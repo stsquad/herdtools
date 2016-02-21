@@ -12,7 +12,7 @@ let rel = rel | (sc & (W | F)) | acq_rel
 				   
 let alloy_ignore_section_end = _
 
-let mo = co & (!nonatomicloc)^2
+(* let mo = co & (!nonatomicloc)^2 *)
 				 
 (*let fr = rf^-1 ; mo*)
 
@@ -26,9 +26,9 @@ let sbf = sb ; [F]
    release_sequence_set *)
 
 (* OLD: let rs = [crel] ; fsb? ; [A & W] ;
-	 (((mo ; [rmw]) | coi) & ~(coe ; [!rmw] ; mo))? *)
+	 (((co ; [rmw]) | coi) & ~(coe ; [!rmw] ; co))? *)
 let rs_prime = int(_ * _) | (_ * (R & W))
-let rs = mo & rs_prime \ ((mo \ rs_prime) ; mo)
+let rs = co & rs_prime \ ((co \ rs_prime) ; co)
 		       
 (* OLD: let swra = ext (rs ; rf ; [A] ; sbf? ; [cacq]) *)
 let swra = ext ([rel] ; fsb? ; [A & W] ; rs? ; rf ; [R & A] ; sbf? ; [acq])
@@ -59,9 +59,9 @@ acyclic hb as Hb
 (* coherent_memory_use *)
 let hbl = hb & loc
 
-let com = mo | rf | fr
+let com = co | rf | fr
 
-irreflexive (mo | (mo ; rf) | fr | (fr ; rf)) ; hb as Coh
+irreflexive (co | (co ; rf) | fr | (fr ; rf)) ; hb as Coh
 
 (* visible_side_effect_set *)
 let vis = ([W] ; hbl ; [R])
@@ -73,7 +73,7 @@ irreflexive (rf ; hb) as Rf
 (* consistent_non_atomic_rf  *)
 empty ((rf ; [nonatomicloc]) \ vis) as NaRf
 
-irreflexive (rf | (mo ; fr) | (mo ; rf)) as Rmw
+irreflexive (rf | (co ; fr) | (co ; rf)) as Rmw
 
 
 (* locks_only_consistent_lo *)
@@ -100,11 +100,11 @@ let ur = int((W * M) | (M * W)) &
 let lu = [ul] &
   ~([ul] ; losbwoul^-1 ; [ls] ; losbwoul ; [ul])*)	   
 	  
-let Simm = S \ (mo ; S)
+let Simm = S \ (co ; S)
 
 irreflexive (S ; hb) as S1
-irreflexive (S ; fsb? ; mo ; sbf?) as S2
-irreflexive (S ; rf^-1; [sc] ; mo) as S3
+irreflexive (S ; fsb? ; co ; sbf?) as S2
+irreflexive (S ; rf^-1; [sc] ; co) as S3
 irreflexive (Simm ; rf^-1 ; hbl ; [W]) as S4
 irreflexive (Simm ; ([R]\(rf^-1 ; rf)) ; fr) as S44
 irreflexive (S ; fsb ; fr) as S5
