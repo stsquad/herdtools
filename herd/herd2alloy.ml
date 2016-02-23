@@ -48,29 +48,52 @@ let alloy_of_dir = function
   | Plain -> "x.(ev-A)"
   | Unv_Set -> "x.ev"
 		 
-let rec alloy_of_op2 args chan es = function
-  | Union -> fprintf_list_infix "+" (alloy_of_exp args) chan es
-  | Inter -> fprintf_list_infix "&" (alloy_of_exp args) chan es
-  | Diff -> fprintf_list_infix "-" (alloy_of_exp args) chan es
-  | Seq -> fprintf_list_infix "." (alloy_of_exp args) chan es
-  | Cartesian -> fprintf_list_infix "->" (alloy_of_exp args) chan es
+let rec alloy_of_op2 (use_preds:bool) args chan es = function
+  | Union ->
+     fprintf_list_infix "+" (alloy_of_exp use_preds args) chan es
+  | Inter ->
+     fprintf_list_infix "&" (alloy_of_exp use_preds args) chan es
+  | Diff ->
+     fprintf_list_infix "-" (alloy_of_exp use_preds args) chan es
+  | Seq ->
+     fprintf_list_infix "." (alloy_of_exp use_preds args) chan es
+  | Cartesian ->
+     fprintf_list_infix "->" (alloy_of_exp use_preds args) chan es
   | _ -> Warn.fatal "alloy_of_op2"
 
-and alloy_of_op1 args chan e = function
-  | Plus -> fprintf chan "(^%a)" (alloy_of_exp args) e
-  | Star -> fprintf chan "(*%a)" (alloy_of_exp args) e
-  | Opt -> fprintf chan "(rc[%a])" (alloy_of_exp args) e
-  | Select (d1,d2) -> fprintf chan "((%s -> %s) & %a)" (alloy_of_dir d1) (alloy_of_dir d2) (alloy_of_exp args) e 
-  | Inv -> fprintf chan "(~%a)" (alloy_of_exp args) e
-  | Square -> fprintf chan "(%a -> %a)" (alloy_of_exp args) e (alloy_of_exp args) e
-  | Ext -> fprintf chan "(%a - x.thd)" (alloy_of_exp args) e
-  | Int -> fprintf chan "(%a & x.thd)" (alloy_of_exp args) e
-  | NoId -> fprintf chan "(%a - iden)" (alloy_of_exp args) e
-  | Set_to_rln -> fprintf chan "(stor[%a])" (alloy_of_exp args) e
-  | Comp SET -> fprintf chan "(x.ev - %a)" (alloy_of_exp args) e
-  | Comp RLN -> fprintf chan "((x.ev -> x.ev) - %a)" (alloy_of_exp args) e
+and alloy_of_op1 (use_preds:bool) args chan e = function
+  | Plus ->
+     fprintf chan "(^%a)" (alloy_of_exp use_preds args) e
+  | Star ->
+     fprintf chan "(*%a)" (alloy_of_exp use_preds args) e
+  | Opt ->
+     fprintf chan "(rc[%a])" (alloy_of_exp use_preds args) e
+  | Select (d1,d2) ->
+     fprintf chan "((%s -> %s) & %a)"
+	     (alloy_of_dir d1) (alloy_of_dir d2)
+	     (alloy_of_exp use_preds args) e 
+  | Inv ->
+     fprintf chan "(~%a)" (alloy_of_exp use_preds args) e
+  | Square ->
+     fprintf chan "(%a -> %a)"
+	     (alloy_of_exp use_preds args) e
+	     (alloy_of_exp use_preds args) e
+  | Ext ->
+     fprintf chan "(%a - x.thd)" (alloy_of_exp use_preds args) e
+  | Int ->
+     fprintf chan "(%a & x.thd)" (alloy_of_exp use_preds args) e
+  | NoId ->
+     fprintf chan "(%a - iden)" (alloy_of_exp use_preds args) e
+  | Set_to_rln ->
+     fprintf chan "(stor[%a])" (alloy_of_exp use_preds args) e
+  | Comp SET ->
+     fprintf chan "(x.ev - %a)" (alloy_of_exp use_preds args) e
+  | Comp RLN ->
+     fprintf chan "((x.ev -> x.ev) - %a)"
+	     (alloy_of_exp use_preds args) e
   | _ -> Warn.fatal "Unknown operator in herd2alloy"
-and alloy_of_var args chan x = 
+		    
+and alloy_of_var (use_preds:bool) args chan x = 
   match x with
   | "asw" | "lo" | "addr" | "data" | "acq" | "rel"
   | "sc" | "R" | "W" | "F" | "A" | "con"
@@ -82,7 +105,8 @@ and alloy_of_var args chan x =
   | "coe" -> fprintf chan "(co - x.thd)"
   | "fr" -> fprintf chan "(fr[x,rf,co])"
   | "fre" -> fprintf chan "(fr[x,rf,co] - x.thd)"
-  | "atom" -> fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
+  | "atom" ->
+     fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
   | "po-loc" -> fprintf chan "(x.sb & x.loc)"
   | "po" | "sb" -> fprintf chan "(x.sb)"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
@@ -93,23 +117,23 @@ and alloy_of_var args chan x =
   | "id" -> fprintf chan "iden"
   | _ -> 
     let x = Str.global_replace (Str.regexp_string "-") "_" x in
-    if List.mem x args then
+    if List.mem x args or (not use_preds) then
       fprintf chan "%s" x
     else
       fprintf chan "(%s[x,rf,co%s])" x (if !with_sc then ",s" else "")
 
-and alloy_of_exp args chan = function
+and alloy_of_exp (use_preds : bool) args chan = function
   | Konst (_,k) -> alloy_of_konst chan k
-  | Var (_,x) -> alloy_of_var args chan x
-  | Op1 (_,op1, e) -> alloy_of_op1 args chan e op1
-  | Op (_,op2, es) -> alloy_of_op2 args chan es op2
+  | Var (_,x) -> alloy_of_var use_preds args chan x
+  | Op1 (_,op1, e) -> alloy_of_op1 use_preds args chan e op1
+  | Op (_,op2, es) -> alloy_of_op2 use_preds args chan es op2
   | App (_,_,_) -> fprintf chan "Functions not done yet"
   | Bind _ -> fprintf chan "Bindings not done yet"
   | BindRec _ -> fprintf chan "Recursive bindings not done yet"
   | Fun _ -> fprintf chan "Local functions not done yet"
   | _ -> Warn.fatal "explicitset/match/tag etc. in herd2alloy"
 
-and alloy_of_binding chan (x, e) = 
+and alloy_of_binding (use_preds : bool) chan (x, e) = 
   match e with
   | Fun (_,_,_,_,_) ->
      fprintf chan "Functions not done yet"
@@ -119,10 +143,13 @@ and alloy_of_binding chan (x, e) =
      else if x = "alloy_ignore_section_end" then
        in_ignore_section := false
      else if not !in_ignore_section then
-       fprintf chan "fun %s[x : BasicExec, rf, co%s : E -> E] : E -> E {\n  %a\n}\n\n" 
-               x
-	       (if !with_sc then ", s" else "")
-               (alloy_of_exp []) e
+       if use_preds then
+	 fprintf chan "fun %s[x : BasicExec, rf, co%s : E -> E] : E -> E {\n  %a\n}\n\n" 
+		 x
+		 (if !with_sc then ", s" else "")
+		 (alloy_of_exp true []) e
+       else
+	 fprintf chan "let %s = %a |\n" x (alloy_of_exp false []) e
 
 let alloy_of_test = function
   | Acyclic -> "acyclic"
@@ -134,8 +161,8 @@ let requires : string list ref = ref []
 let seen_requires_clause : bool ref = ref false
 					  
 
-let print_derived_relations chan = function
-  | Let (_,bs) -> List.iter (alloy_of_binding chan) bs
+let print_derived_relations b chan = function
+  | Let (_,bs) -> List.iter (alloy_of_binding b chan) bs
   | _ -> ()
 
 let print_predicates chan = function
@@ -151,7 +178,7 @@ let print_predicates chan = function
 	    name
 	    (if !with_sc then ", s" else "")
 	    (alloy_of_test test)
-	    (alloy_of_exp []) exp;
+	    (alloy_of_exp true []) exp;
     begin match test_type with
     | Provides -> 
        if (!seen_requires_clause) then
@@ -161,26 +188,102 @@ let print_predicates chan = function
        seen_requires_clause := true;
        requires := name :: (!requires)
     end
-
   | _ -> ()
-					 
 
-let alloy_of_prog chan (with_sc_arg:bool) prog =
+let print_provide_predicates chan = function
+  | Test (_,_, test, exp, name, Provides) ->
+     let name = begin
+	 match name with 
+	 | None ->
+	    Warn.user_error "You need to give each constraint a name!"
+         | Some name -> name 
+       end
+     in
+     fprintf chan "let %s = %s[%a] |\n" 
+	     name
+	     (alloy_of_test test)
+	     (alloy_of_exp false []) exp;
+     provides := name :: (!provides)
+  | _ -> ()
+
+let print_require_predicates chan = function
+  | Test (_,_, test, exp, name, Requires) ->
+     let name = begin
+	 match name with 
+	 | None ->
+	    Warn.user_error "You need to give each constraint a name!"
+         | Some name -> name 
+       end
+     in
+    fprintf chan "let %s = %s[%a] |\n" 
+	    name
+	    (alloy_of_test test)
+	    (alloy_of_exp false []) exp;
+    requires := name :: (!requires)
+  | _ -> ()
+
+let alloy_of_prog chan (with_sc_arg:bool) (use_preds:bool) prog =
 
   with_sc := with_sc_arg;
   
-  List.iter (print_derived_relations chan) prog;
+  match use_preds with
+  | true -> begin
+ 
+      List.iter (print_derived_relations true chan) prog;
+      
+      List.iter (print_predicates chan) prog;
+      
+      fprintf chan "pred consistent[x : BasicExec, rf, co : E -> E] {\n      ";
+      if !with_sc then
+	fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
+      (*  fprintf chan "  some y : Extras | wf_Extras[x,y%s] &&\n    " (if !with_sc then ",s" else ""); *)
 
-  List.iter (print_predicates chan) prog;
+      fprintf chan "no none\n";
 
-  fprintf chan "pred consistent[x : BasicExec, rf, co : E -> E] {\n      ";
-  if !with_sc then
-    fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
-  (*  fprintf chan "  some y : Extras | wf_Extras[x,y%s] &&\n    " (if !with_sc then ",s" else ""); *)
-  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,co%s]" s (if !with_sc then ",s" else "")) chan (List.rev !provides);
-  fprintf chan "\n}\n\n";
+      List.iter (fun s -> fprintf chan "&& %s[x,rf,co%s]\n" s (if !with_sc then ",s" else "")) (List.rev !provides);
+      
+      fprintf chan "\n}\n\n";
+      
+      fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E] {\n      ";
 
-  fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E] {\n      ";
-  fprintf_iter "\n    && " (fun chan s -> fprintf chan "%s[x,rf,none->none%s]" s (if !with_sc then ",none->none" else "")) chan (List.rev !requires);
-  fprintf chan "\n}\n\n";
+      fprintf chan "no none\n";
+
+      List.iter (fun s -> fprintf chan "&& %s[x,rf,none->none%s]\n" s (if !with_sc then ",none->none" else "")) (List.rev !requires);
+      
+      fprintf chan "\n}\n\n"
+    end
+	      
+  | false -> begin
+
+      fprintf chan "pred consistent[x : BasicExec, rf, co : E -> E] {\n      ";
+      if !with_sc then
+	fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
+
+      List.iter (print_derived_relations false chan) prog;
+
+      List.iter (print_provide_predicates chan) prog;
+
+      fprintf chan "no none\n";
+
+      List.iter (fun s -> fprintf chan "&& %s\n" s) (List.rev !provides);
+      
+      fprintf chan "\n}\n\n";
+
+      fprintf chan "pred not_faulty[x : BasicExec, rf : E -> E] {\n      ";
+      fprintf chan "let co = none->none |\n";
+
+      if !with_sc then fprintf chan "let s = none->none |\n";
+
+      List.iter (print_derived_relations false chan) prog;
+
+      List.iter (print_require_predicates chan) prog;
+
+      fprintf chan "no none\n";
+
+      List.iter (fun s -> fprintf chan "&& %s\n" s) (List.rev !requires);
+
+      fprintf chan "\n}\n\n"
+      
+      
+    end
   
