@@ -16,6 +16,7 @@ module type Config = sig
   val verbose : int
   val rename : string -> string
   val ok : string -> bool
+  val hexa : bool
 end
 
 module Make(O:Config) = struct
@@ -36,7 +37,9 @@ let no_hash = None
 let no_time = None
 
 let to_dec num = try string_of_int (int_of_string num) with _ -> num
+let to_hex num = try sprintf "0x%x" (int_of_string num) with _ -> num
 
+let to_norm = if O.hexa then to_hex else to_dec
 }
 
 let digit = [ '0'-'9' ]
@@ -134,7 +137,7 @@ and pline k = parse
     blank* '=' blank* (('-' ? (num|hexanum))|name|set as v)
     blank* ';'
     {
-     let v = to_dec v in  (* Translate to decimal *)
+     let v = to_norm v in  (* Translate to decimal/hexa *)
      let p = poolize loc v in
      pline (p::k) lexbuf }
 | blank* ('#' [^'\n']*)?  nl  { incr_lineno lexbuf ; k }

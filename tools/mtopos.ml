@@ -30,6 +30,7 @@ module Make(O:Config) = struct
         let ok = match O.names with
         | None -> fun _ -> true
         | Some set -> fun s -> StringSet.mem s set 
+        let hexa = false
       end)
 
   module LS = LogState.Make(O)

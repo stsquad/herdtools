@@ -104,6 +104,7 @@ module LL =
       let verbose = verbose
       let rename = do_rename
       let ok = select_name
+      let hexa = false
     end)
 
 
