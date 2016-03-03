@@ -79,9 +79,9 @@ and alloy_of_op1 (use_preds:bool) args chan e = function
 	     (alloy_of_exp use_preds args) e
 	     (alloy_of_exp use_preds args) e
   | Ext ->
-     fprintf chan "(%a - x.thd)" (alloy_of_exp use_preds args) e
+     fprintf chan "(%a - x.sthd)" (alloy_of_exp use_preds args) e
   | Int ->
-     fprintf chan "(%a & x.thd)" (alloy_of_exp use_preds args) e
+     fprintf chan "(%a & x.sthd)" (alloy_of_exp use_preds args) e
   | NoId ->
      fprintf chan "(%a - iden)" (alloy_of_exp use_preds args) e
   | Set_to_rln ->
@@ -96,18 +96,20 @@ and alloy_of_op1 (use_preds:bool) args chan e = function
 and alloy_of_var (use_preds:bool) args chan x = 
   match x with
   | "asw" | "lo" | "acq" | "rel"
-  | "sc" | "R" | "W" | "F" | "A" | "con"
-  | "thd" | "loc"
-	-> fprintf chan "(x.%s)" x
+  | "sc" | "R" | "W" | "F" | "A"
+  | "con"
+    -> fprintf chan "(x.%s)" x
+  | "thd" -> fprintf chan "(x.sthd)"
+  | "loc" -> fprintf chan "(x.sloc)"
   | "rf" -> fprintf chan "rf"
-  | "rfe" -> fprintf chan "(rf - x.thd)"
+  | "rfe" -> fprintf chan "(rf - x.sthd)"
   | "co" -> fprintf chan "co"
-  | "coe" -> fprintf chan "(co - x.thd)"
+  | "coe" -> fprintf chan "(co - x.sthd)"
   | "fr" -> fprintf chan "(fr[x,rf,co])"
-  | "fre" -> fprintf chan "(fr[x,rf,co] - x.thd)"
+  | "fre" -> fprintf chan "(fr[x,rf,co] - x.sthd)"
   | "atom" ->
      fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
-  | "po-loc" -> fprintf chan "(x.sb & x.loc)"
+  | "po-loc" -> fprintf chan "(x.sb & x.sloc)"
   | "po" | "sb" -> fprintf chan "(x.sb)"
   | "addr" -> fprintf chan "(x.ad)"
   | "data" -> fprintf chan "(x.dd)"
