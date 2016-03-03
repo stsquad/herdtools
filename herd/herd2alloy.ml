@@ -95,7 +95,7 @@ and alloy_of_op1 (use_preds:bool) args chan e = function
 		    
 and alloy_of_var (use_preds:bool) args chan x = 
   match x with
-  | "asw" | "lo" | "addr" | "data" | "acq" | "rel"
+  | "asw" | "lo" | "acq" | "rel"
   | "sc" | "R" | "W" | "F" | "A" | "con"
   | "thd" | "loc"
 	-> fprintf chan "(x.%s)" x
@@ -109,6 +109,9 @@ and alloy_of_var (use_preds:bool) args chan x =
      fprintf chan "(none -> none)" (* ignore atomic stuff for now *)
   | "po-loc" -> fprintf chan "(x.sb & x.loc)"
   | "po" | "sb" -> fprintf chan "(x.sb)"
+  | "addr" -> fprintf chan "(x.ad)"
+  | "data" -> fprintf chan "(x.dd)"
+  | "ctrl" -> fprintf chan "(x.cd)"
   | "nonatomicloc" -> fprintf chan "(x.naL)"
   | "MFENCE" -> fprintf chan "(x.F)"
   | "S" -> fprintf chan "s"
