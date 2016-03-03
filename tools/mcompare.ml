@@ -50,6 +50,7 @@ type runopts =
      cond_pos : string option ;
      cond_neg : string option ;
      opt_cond : bool ;
+     hexa : bool ;
    }
 
 let default_runopts =
@@ -80,6 +81,7 @@ let default_runopts =
    cond_pos = None;
    cond_neg = None;
    opt_cond = false;
+   hexa = false;
  }
 
 let runopts = default_runopts
@@ -221,6 +223,11 @@ let options =
         (delay_ro
            (fun b ro -> { ro with opt_cond = b; })),
     (sprintf "<bool> optimise dumped conditions, default %b" runopts.opt_cond));
+   ("-hexa",
+      Arg.Bool
+        (delay_ro
+           (fun b ro -> { ro with hexa = b; })),
+    (sprintf "<bool> hexadecimal output, default %b" runopts.hexa));
  ]
 
 let prog =
@@ -269,6 +276,7 @@ module type Config = sig
   val cond_pos : string option
   val cond_neg : string option
   val opt_cond : bool
+  val hexa : bool
 end
 
 module Verbose = struct let verbose = !verb end
@@ -348,6 +356,7 @@ module Config = struct
   let cond_pos = runopts.cond_pos
   let cond_neg = runopts.cond_neg
   let opt_cond = runopts.opt_cond
+  let hexa = runopts.hexa
 end
 
 (************)
@@ -417,6 +426,7 @@ module Make (Opt:Config) = struct
         let verbose = Opt.verbose
         let rename = do_rename
         let ok = ok_select
+        let hexa = Opt.hexa
       end)
 
 

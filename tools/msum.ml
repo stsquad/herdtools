@@ -20,6 +20,7 @@ let exclude = ref []
 let select = ref []
 let rename = ref []
 let npar = ref 1
+let hexa = ref false
 
 let options =
   [
@@ -37,6 +38,8 @@ let options =
    "<name> specify test or test index  file, can be repeated") ;
   ("-rename", Arg.String (fun s -> rename := !rename @ [s]),     
     "<name> specify a rename mapping, for renaming some tests, hashes checked") ;
+  ("-hexa <bool>",Arg.Bool (fun b ->  hexa := b),
+    "output in hexadecimal");
   ]
 
 let prog =
@@ -56,6 +59,7 @@ let exclude = !exclude
 let select = !select
 let rename = !rename
 let verbose = !verbose
+let hexa = !hexa
 module Verbose = struct let verbose = verbose end
 
 (* Options for recursive calls *)
@@ -127,6 +131,7 @@ module LL =
       let verbose = verbose
       let rename = do_rename
       let ok = select_name
+      let hexa = hexa
     end)
 
 

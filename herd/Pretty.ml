@@ -1242,7 +1242,7 @@ let one_init = match PC.graph with
   let select_rfmap rfm =
     S.RFMap.fold
       (fun wt rf k ->  match wt,rf with
-      | (_,S.Store e)
+      | (_,S.Store e) when select_event e -> S.RFMap.add wt rf k
       | (S.Load e,_) when select_event e -> S.RFMap.add wt rf k
       | _,_ -> k)
       rfm S.RFMap.empty

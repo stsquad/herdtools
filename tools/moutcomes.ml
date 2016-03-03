@@ -83,6 +83,7 @@ module LL =
       let verbose = verbose
       let rename x = x
       let ok = select_name
+      let hexa = false
     end)
 
 
