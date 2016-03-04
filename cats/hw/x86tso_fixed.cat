@@ -24,3 +24,5 @@ let GHB = mfence | implied | po_ghb | rfe | fr | co
 show mfence
 show implied
 acyclic GHB as GHB
+
+let hb = po

@@ -260,6 +260,18 @@ let alloy_of_prog chan (with_sc_arg:bool) (use_preds:bool) prog =
 	      
   | false -> begin
 
+      fprintf chan "fun hbfun[x : BasicExec, rf : E -> E] : E -> E {\n      ";
+
+      fprintf chan "let co = none->none |\n";
+      
+      if !with_sc then fprintf chan "let s = none->none |\n";
+
+      List.iter (print_derived_relations false chan) prog;
+
+      fprintf chan "hb\n";
+      
+      fprintf chan "\n}\n\n";
+
       fprintf chan "pred consistent[x : BasicExec, rf, co : E -> E] {\n      ";
       if !with_sc then
 	fprintf chan "  some s : E -> E when ax_wfS[x,s] |\n      ";
