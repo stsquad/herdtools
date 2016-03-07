@@ -99,7 +99,7 @@ let ur = int(cnf \ [_] \ sb \ (sb^-1))
 let lu = [ul] &
   ~([ul] ; losbwoul^-1 ; [ls] ; losbwoul ; [ul])*)
 
-let scp = ((sc^2) & (fsb?; (co | fr | hb); sbf?)) \ [_]
+let scp = ((sc*sc) & (fsb?; (co | fr | hb); sbf?)) \ [_]
 
 acyclic scp as Ssimp
 show scp
