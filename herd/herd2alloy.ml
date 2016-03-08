@@ -157,7 +157,7 @@ and alloy_of_binding (use_preds : bool) chan (x, e) =
 	 fprintf chan "let %s = %a |\n" x (alloy_of_exp false []) e
 
 let alloy_of_test = function
-  | Acyclic -> "acyclic"
+  | Acyclic -> "is_acyclic"
   | Irreflexive -> "irreflexive"
   | TestEmpty -> "is_empty"
 
