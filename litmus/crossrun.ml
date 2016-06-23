@@ -17,14 +17,16 @@ type addr ={ host : string ; port : int option ; }
 
 type t =
   | Host of addr
+  | Qemu
   | Adb
   | No
 
-let tags = ["none";"adb";"host[:port]";]
+let tags = ["none";"adb";"qemu";"host[:port]";]
 
 let parse tag = match tag with
 | "none" -> Some No
 | "adb"  -> Some Adb
+| "qemu"  -> Some Qemu
 | _ ->
     let h =
       try
@@ -42,6 +44,7 @@ open Printf
 let pp = function
   | No -> "none"
   | Adb -> "adb"
+  | Qemu -> "qemu"
   | Host h ->
       match h.port with
       | None -> h.host
